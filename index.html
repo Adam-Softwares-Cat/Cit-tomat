@@ -1,219 +1,115 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Citátomat — PWA</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Citátomat</title>
 
   <!-- PWA META -->
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#4A90E2">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4A90E2">
 
-<!-- Apple ikony -->
-<link rel="apple-touch-icon" sizes="192x192" href="/assets/citatomat-icon-192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="/assets/citatomat-icon-512.png">
+  <!-- Apple ikony -->
+  <link rel="apple-touch-icon" sizes="192x192" href="assets/citatomat-icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="assets/citatomat-icon-512.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-
-<style>
-  :root{--bg:#f6f7fb;--card:#fff;--accent:#3b82f6;--muted:#6b7280}
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;background:var(--bg);margin:0;padding:20px;display:flex;align-items:center;justify-content:center;min-height:100vh}
-  .app{width:100%;max-width:640px}
-  header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-  h1{font-size:1.2rem;margin:0}
-  .card{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
-  #quote{min-height:80px;display:flex;align-items:center;justify-content:center;text-align:center;padding:16px;border-radius:10px;font-size:1.05rem}
-  .controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-  button{border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
-  .btn-primary{background:var(--accent);color:#fff}
-  .btn-ghost{background:transparent;border:1px solid #e6e9ef;color:var(--muted)}
-  .small{font-size:0.9rem;padding:8px 10px}
-  .history-list{margin-top:14px;max-height:260px;overflow:auto;padding:8px;display:grid;gap:8px}
-  .item{background:#fbfbfe;padding:10px;border-radius:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-  .item p{margin:0;font-size:0.95rem}
-  .item .meta{display:flex;gap:8px}
-  .empty{color:var(--muted);text-align:center;padding:18px}
-  footer{margin-top:12px;display:flex;gap:10px;justify-content:space-between;align-items:center}
-  @media (max-width:420px){#quote{font-size:1rem;padding:12px}}
-</style>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f0f0;
+      text-align: center;
+    }
+    header {
+      background: #4A90E2;
+      padding: 1rem;
+      color: white;
+    }
+    header span[role="img"] {
+      font-size: 2rem;
+      display: block;
+    }
+    main {
+      padding: 1rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      margin: 0.5rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #4A90E2;
+      color: white;
+    }
+    .btn-secondary {
+      background: #ccc;
+      color: black;
+    }
+    footer {
+      font-size: 0.8rem;
+      color: #777;
+      padding: 1rem;
+    }
+  </style>
 </head>
 <body>
-<div class="app">
   <header>
-    <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#ffd6a5,#ffadad);display:flex;align-items:center;justify-content:center;font-weight:700">😸</div>
-    <div>
-      <h1>Citátomat — PWA</h1>
-      <div style="color:var(--muted);font-size:0.85rem">Generuj šílené citáty. Ukládají se do telefonu.</div>
-    </div>
+    <span role="img" aria-label="kočka">😸</span>
+    <h1>Citátomat</h1>
   </header>
 
-  <div class="card">
-    <div id="quote" aria-live="polite">Klepni na <strong> Generovat</strong>!</div>
+  <main>
+    <p id="quote">Klikni na "Generovat" pro náhodný citát!</p>
+    <button type="button" id="generate" class="btn-primary">Generovat</button>
+    <button type="button" id="share" class="btn-secondary">Sdílet</button>
+  </main>
 
-    <div class="controls">
-      <button id="generate" class="btn-primary">Generovat</button>
-      <button id="share" class="btn-ghost">Sdílet</button>
-      <button id="showHistory" class="btn-ghost">Historie</button>
-      <button id="clear" class="small btn-ghost">Smazat historii</button>
-    </div>
+  <footer>
+    &copy; 2025 Citátomat
+  </footer>
 
-    <div id="historyPanel" style="display:none;margin-top:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <strong>Historie</strong>
-        <div style="display:flex;gap:8px">
-          <button id="export" class="small btn-ghost">Export .txt</button>
-          <button id="closeHistory" class="small btn-ghost">Zavřít</button>
-        </div>
-      </div>
-      <div class="history-list" id="historyList"></div>
-      <div id="emptyHint" class="empty" style="display:none">Žádné citáty zatím — generuj!</div>
-    </div>
+  <script>
+    const quotes = [
+      "Život je jako jízda na kole – abyste udrželi rovnováhu, musíte se pohybovat.",
+      "Nikdy není pozdě být tím, kým jste mohli být.",
+      "Štěstí přeje připraveným.",
+      "Věř, že můžeš – a jsi v polovině cesty."
+    ];
 
-    <footer>
-      <div style="color:var(--muted);font-size:0.9rem">Uloženo v localStorage</div>
-      <div style="color:var(--muted);font-size:0.9rem">PWA pro iPhone</div>
-    </footer>
-  </div>
-</div>
-
-<script>
-(() => {
-  const quotes = [
-    "Život je jako bonboniéra, nikdy nevíš, co ochutnáš.",
-    "Kdo se bojí, nesmí do lesa.",
-    "Nejlepší pomstou je obrovský úspěch.",
-    "Slova jsou zbytečná, činy mluví hlasitěji.",
-    "Kočka je pánem domu, člověk jen nájemník.",
-    "Čím více víš, tím více si uvědomuješ, že nic nevíš.",
-    "Kdo chce, hledá způsob. Kdo nechce, hledá důvod.",
-    "Není důležité, kolikrát spadneš, ale kolikrát vstaneš.",
-    "Lépe být chvíli blázen než celý život idiot.",
-    "Čas je nejdražší měna. Můžeš ho utratit jen jednou.",
-    "Velké věci nikdy nevznikly v komfortní zóně.",
-    "Začni tam, kde jsi. Použij, co máš. Dělej, co můžeš.",
-    "Nečekej na správný okamžik. Vytvoř si ho.",
-    "Každý expert byl kdysi začátečník.",
-    "Tvoje budoucnost začíná teď, ne zítra.",
-    "Kočky nejsou našimi mazlíčky. Jsme jejich personál.",
-    "Tam, kde spí kočka, je domov.",
-    "Když mluví kočka, lidé poslouchají… i když nechápou.",
-    "Kočka se nikdy neponíží tím, že poslechne.",
-    "Jedna kočka stačí k naplnění prázdného bytu štěstím.",
-    "Jsem na dietě. Dnes jen pět porcí dortu.",
-    "Práce není zajíc. Neuteče. Ale taky se sama neudělá.",
-    "Lepší být blázen s úsměvem než génius se žaludem v nose.",
-    "Mozek je skvělá věc. Škoda, že ho lidi nepoužívají častěji.",
-    "Kdybych měl dolar za každou chybu, co jsem udělal, byl bych milionář. A pořád dělal chyby.",
-    "Láska není o dokonalosti, ale o přijetí.",
-    "Skutečná láska začíná tam, kde končí očekávání.",
-    "Láska je jako Wi-Fi – silná, když jsi blízko, a občas vypadává.",
-    "Kočky nás učí milovat bez podmínek. A taky, že nedostaneš všechno, co chceš.",
-    "Srdce má důvody, které rozum nezná."
-  ];
-
-  const LSK = 'citato_history_v1';
-  const quoteEl = document.getElementById('quote');
-  const genBtn = document.getElementById('generate');
-  const shareBtn = document.getElementById('share');
-  const histBtn = document.getElementById('showHistory');
-  const clearBtn = document.getElementById('clear');
-  const historyPanel = document.getElementById('historyPanel');
-  const historyList = document.getElementById('historyList');
-  const emptyHint = document.getElementById('emptyHint');
-  const closeHistory = document.getElementById('closeHistory');
-  const exportBtn = document.getElementById('export');
-
-  let history = JSON.parse(localStorage.getItem(LSK) || '[]');
-  let current = '';
-
-  function saveHistory() {
-    localStorage.setItem(LSK, JSON.stringify(history));
-  }
-
-  function renderHistory() {
-    historyList.innerHTML = '';
-    if(history.length === 0) {
-      emptyHint.style.display = 'block';
-      return;
-    } else {
-      emptyHint.style.display = 'none';
+    function halfCombine(a, b) {
+      const wordsA = a.split(' ');
+      const wordsB = b.split(' ');
+      return [...wordsA.slice(0, Math.floor(wordsA.length / 2)),
+              ...wordsB.slice(Math.floor(wordsB.length / 2))].join(' ');
     }
-    [...history].reverse().forEach(q => {
-      const item = document.createElement('div');
-      item.className = 'item';
-      const p = document.createElement('p');
-      p.textContent = q;
-      const meta = document.createElement('div');
-      meta.className = 'meta';
-      const copyBtn = document.createElement('button');
-      copyBtn.className = 'small btn-ghost';
-      copyBtn.textContent = 'Kopírovat';
-      copyBtn.onclick = () => navigator.clipboard?.writeText(q);
-      const shareBtnLocal = document.createElement('button');
-      shareBtnLocal.className = 'small btn-ghost';
-      shareBtnLocal.textContent = 'Sdílet';
-      shareBtnLocal.onclick = () => doShare(q);
-      meta.append(copyBtn, shareBtnLocal);
-      item.append(p, meta);
-      historyList.appendChild(item);
+
+    document.getElementById('generate').addEventListener('click', () => {
+      const quote = quotes[Math.floor(Math.random() * quotes.length)];
+      const quote2 = quotes[Math.floor(Math.random() * quotes.length)];
+      document.getElementById('quote').textContent = halfCombine(quote, quote2);
     });
-  }
 
-  function halfCombine(a, b) {
-    const half1 = a.slice(0, Math.floor(a.length/2));
-    const half2 = b.slice(Math.floor(b.length/2));
-    return half1 + half2;
-  }
+    document.getElementById('share').addEventListener('click', () => {
+      if (navigator.share) {
+        navigator.share({
+          title: 'Citátomat',
+          text: document.getElementById('quote').textContent
+        });
+      } else {
+        alert('Sdílení není na tomto zařízení podporováno.');
+      }
+    });
 
-  function generate() {
-    if(quotes.length < 2) return;
-    const q = halfCombine(
-      quotes[Math.floor(Math.random()*quotes.length)],
-      quotes[Math.floor(Math.random()*quotes.length)]
-    );
-    current = q;
-    quoteEl.textContent = q;
-    history.push(q);
-    saveHistory();
-  }
-
-  async function doShare(text) {
-    if(navigator.share) {
-      try {
-        await navigator.share({text, title: 'Citátomat'});
-      } catch(e){}
-    } else if(navigator.clipboard) {
-      await navigator.clipboard.writeText(text);
-      alert('Citát zkopírován do schránky.');
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js', { scope: './' })
+        .then(() => console.log('Service Worker zaregistrován.'));
     }
-  }
-
-  genBtn.onclick = generate;
-  shareBtn.onclick = () => current && doShare(current);
-  histBtn.onclick = () => { renderHistory(); historyPanel.style.display = 'block'; };
-  closeHistory.onclick = () => { historyPanel.style.display = 'none'; };
-  clearBtn.onclick = () => { if(confirm('Smazat historii?')) { history=[]; saveHistory(); renderHistory(); historyPanel.style.display = 'none'; } };
-  exportBtn.onclick = () => {
-    if(history.length===0) return alert('Žádné citáty k exportu.');
-    const blob = new Blob([history.join('\n\n')], {type: 'text/plain'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href=url; a.download='citato_history.txt';
-    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  };
-
-  if(history.length) { current = history[history.length-1]; quoteEl.textContent = current; }
-})();
-</script>
-
-<script>
-// Registrace Service Workeru pro PWA
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(() => {
-    console.log('Service Worker registrován');
-  }).catch(err => console.error('SW chyba:', err));
-}
-</script>
+  </script>
 </body>
 </html>
