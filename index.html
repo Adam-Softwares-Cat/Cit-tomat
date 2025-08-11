@@ -128,11 +128,6 @@ const quotes = [
               ...wordsB.slice(Math.floor(wordsB.length / 2))].join(' ');
     }
 
-    document.getElementById('generate').addEventListener('click', () => {
-      const quote = quotes[Math.floor(Math.random() * quotes.length)];
-      const quote2 = quotes[Math.floor(Math.random() * quotes.length)];
-      document.getElementById('quote').textContent = halfCombine(quote, quote2);
-    });
 
     const LSK = 'citato_history_v1';
 let history = JSON.parse(localStorage.getItem(LSK) || '[]');
