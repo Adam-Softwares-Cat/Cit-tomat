@@ -68,6 +68,18 @@
     <p id="quote">Klikni na "Generovat" pro náhodný citát!</p>
     <button type="button" id="generate" class="btn-primary">Generovat</button>
     <button type="button" id="share" class="btn-secondary">Sdílet</button>
+    <button type="button" id="showHistory" class="btn-secondary">Historie</button>
+
+<div id="historyPanel" style="display:none; margin-top: 1rem; text-align: left; max-height: 200px; overflow-y: auto; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 8px;">
+  <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+    <strong>Historie</strong>
+    <button id="closeHistory" type="button" class="btn-secondary" style="padding: 2px 8px;">Zavřít</button>
+  </div>
+  <div id="historyList"></div>
+  <div id="emptyHint" style="color:#666; text-align:center; display:none;">Žádné citáty zatím — generuj!</div>
+  <button id="clear" type="button" class="btn-secondary" style="margin-top:8px;">Smazat historii</button>
+</div>
+
   </main>
 
   <footer>
@@ -121,6 +133,60 @@ const quotes = [
       const quote2 = quotes[Math.floor(Math.random() * quotes.length)];
       document.getElementById('quote').textContent = halfCombine(quote, quote2);
     });
+
+    const LSK = 'citato_history_v1';
+let history = JSON.parse(localStorage.getItem(LSK) || '[]');
+
+function saveHistory() {
+  localStorage.setItem(LSK, JSON.stringify(history));
+}
+
+function renderHistory() {
+  const historyList = document.getElementById('historyList');
+  const emptyHint = document.getElementById('emptyHint');
+  historyList.innerHTML = '';
+  if (history.length === 0) {
+    emptyHint.style.display = 'block';
+    return;
+  }
+  emptyHint.style.display = 'none';
+  history.slice().reverse().forEach(q => {
+    const div = document.createElement('div');
+    div.textContent = q;
+    div.style.padding = '4px 0';
+    div.style.borderBottom = '1px solid #eee';
+    historyList.appendChild(div);
+  });
+}
+
+document.getElementById('showHistory').addEventListener('click', () => {
+  renderHistory();
+  document.getElementById('historyPanel').style.display = 'block';
+});
+
+document.getElementById('closeHistory').addEventListener('click', () => {
+  document.getElementById('historyPanel').style.display = 'none';
+});
+
+document.getElementById('clear').addEventListener('click', () => {
+  if (confirm('Smazat historii?')) {
+    history = [];
+    saveHistory();
+    renderHistory();
+    document.getElementById('historyPanel').style.display = 'none';
+  }
+});
+
+// Upravit generování citátu, aby se ukládal do historie:
+document.getElementById('generate').addEventListener('click', () => {
+  const quote = quotes[Math.floor(Math.random() * quotes.length)];
+  const quote2 = quotes[Math.floor(Math.random() * quotes.length)];
+  const combined = halfCombine(quote, quote2);
+  document.getElementById('quote').textContent = combined;
+  history.push(combined);
+  saveHistory();
+});
+
 
     document.getElementById('share').addEventListener('click', () => {
       if (navigator.share) {
